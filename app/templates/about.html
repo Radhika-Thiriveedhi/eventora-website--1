@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}About Us – TripMate Platform{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white border-bottom">
+  <div class="container py-4 text-center">
+    <span class="badge-tm badge-tm-terracotta mb-2">Our Mission</span>
+    <h1 class="display-5 fw-bold">Empowering Travelers & Tourism Partners</h1>
+    <p class="text-muted max-w-700 mx-auto">
+      TripMate was conceived to eliminate the chaos of planning journeys across fragmented platforms. We bridge verified travel agencies, boutique hoteliers, and explorers with a unified, transparent operating ecosystem.
+    </p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row g-5 align-items-center">
+    <div class="col-lg-6">
+      <h3 class="fw-bold mb-3">Our Core Commitments</h3>
+      <div class="d-flex gap-3 mb-4">
+        <div class="brand-icon flex-shrink-0" style="background: var(--tm-secondary);">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Server-Side Verified Pricing</h5>
+          <p class="text-muted small">No sudden checkout surcharges or fluctuating third-party fees. Every price is strictly validated and confirmed directly with operators.</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mb-4">
+        <div class="brand-icon flex-shrink-0" style="background: var(--tm-primary);">
+          <i class="bi bi-diagram-3"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Four-Sided Accountability</h5>
+          <p class="text-muted small">Separate, dedicated portals for Customers, Travel Agencies, Hoteliers, and Platform Administrators ensure seamless workflow execution.</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3">
+        <div class="brand-icon flex-shrink-0" style="background: var(--tm-accent);">
+          <i class="bi bi-piggy-bank"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-1">Integrated Financial Clarity</h5>
+          <p class="text-muted small">Plan day-by-day itineraries with integrated budget vs. actual expense accounting so you always know where your travel money is going.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80" alt="Travel Team" class="img-fluid rounded-4 shadow-sm">
+    </div>
+  </div>
+</div>
+{% endblock %}
