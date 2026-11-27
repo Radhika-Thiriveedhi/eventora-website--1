@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications – TripMate{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge-tm badge-tm-terracotta mb-1">Alerts</span>
+      <h2 class="fw-bold mb-0">System Notifications</h2>
+    </div>
+    {% if notifications %}
+      <form action="{{ url_for('notifications.mark_all_read') }}" method="POST">
+        <button type="submit" class="btn btn-tm-outline btn-tm-sm">
+          <i class="bi bi-check2-all me-1"></i> Mark All as Read
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+    <div class="card-tm p-0 overflow-hidden">
+      <div class="list-group list-group-flush">
+        {% for n in notifications %}
+          <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}" class="list-group-item list-group-item-action p-4 border-bottom {% if not n.is_read %}bg-light{% endif %}">
+            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+              <h6 class="fw-bold mb-0 {% if not n.is_read %}text-dark{% else %}text-muted{% endif %}">
+                {% if not n.is_read %}<span class="badge bg-primary me-2 rounded-circle p-1"> </span>{% endif %}
+                {{ n.title }}
+              </h6>
+              <small class="text-muted">{{ n.created_at|date_format }}</small>
+            </div>
+            <p class="mb-1 text-muted small">{{ n.message }}</p>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="card-tm p-5 text-center text-muted">
+      <i class="bi bi-bell-slash display-4 mb-2"></i>
+      <p class="mb-0">You have no new notifications.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
