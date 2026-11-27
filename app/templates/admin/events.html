@@ -1,0 +1,41 @@
+{% extends "dashboard_base.html" %}
+{% block title %}All Events (Admin){% endblock %}
+{% block page_title %}All Events{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('admin.users') }}" class="sidebar-link"><i class="bi bi-people nav-icon"></i> All Users</a>
+<a href="{{ url_for('admin.vendors') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendor Verification</a>
+<a href="{{ url_for('admin.events') }}" class="sidebar-link active"><i class="bi bi-calendar-event nav-icon"></i> All Events</a>
+<a href="{{ url_for('admin.bookings') }}" class="sidebar-link"><i class="bi bi-ticket nav-icon"></i> All Bookings</a>
+<a href="{{ url_for('admin.reports') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+<a href="{{ url_for('public.home') }}" class="sidebar-link"><i class="bi bi-house nav-icon"></i> Public Site</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title">All Events ({{ events|length }})</div>
+</div>
+<div class="table-wrapper">
+  {% if events %}
+  <table class="table mb-0">
+    <thead><tr><th>Event</th><th>Category</th><th>Organizer</th><th>Date</th><th>Bookings</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for ev in events %}
+    <tr>
+      <td>
+        <div style="font-weight:600;color:var(--slate-900);">{{ ev.title }}</div>
+        <div style="font-size:.75rem;color:var(--slate-500);">{{ ev.location or '—' }}</div>
+      </td>
+      <td style="font-size:.82rem;">{{ ev.category|title if ev.category else '—' }}</td>
+      <td style="font-size:.82rem;color:var(--slate-600);">{{ ev.organizer.name }}</td>
+      <td style="font-size:.82rem;color:var(--slate-600);">{{ ev.event_date.strftime('%d %b %Y') }}</td>
+      <td style="font-size:.85rem;font-weight:600;">{{ ev.bookings.count() }}</td>
+      <td><span class="status-badge status-{{ ev.status }}">{{ ev.status|title }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div><div class="empty-state-title">No events yet</div></div>
+  {% endif %}
+</div>
+{% endblock %}
