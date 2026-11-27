@@ -1,0 +1,59 @@
+{% extends "dashboard_base.html" %}
+{% block title %}My Earnings{% endblock %}
+{% block page_title %}Earnings{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('vendors.dashboard') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('vendors.my_profile') }}" class="sidebar-link"><i class="bi bi-person-badge nav-icon"></i> My Profile</a>
+<a href="{{ url_for('vendors.requests') }}" class="sidebar-link"><i class="bi bi-inbox nav-icon"></i> Service Requests</a>
+<a href="{{ url_for('vendors.earnings') }}" class="sidebar-link active"><i class="bi bi-wallet2 nav-icon"></i> Earnings</a>
+<a href="{{ url_for('notifications.index') }}" class="sidebar-link"><i class="bi bi-bell nav-icon"></i> Notifications</a>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Account</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title">Earnings & Payment History</div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-card-icon green"><i class="bi bi-currency-rupee"></i></div>
+      <div>
+        <div class="stat-card-num">₹{{ '{:,.0f}'.format(total) }}</div>
+        <div class="stat-card-label">Total Earned</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-card-icon teal"><i class="bi bi-trophy"></i></div>
+      <div>
+        <div class="stat-card-num">{{ bookings|length }}</div>
+        <div class="stat-card-label">Completed Jobs</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="table-wrapper">
+  {% if bookings %}
+  <table class="table mb-0">
+    <thead><tr><th>Event</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for bk in bookings %}
+    <tr>
+      <td style="font-weight:600;">{{ bk.event.title }}</td>
+      <td style="font-size:.82rem;color:var(--slate-500);">{{ bk.service_date.strftime('%d %b %Y') if bk.service_date else '—' }}</td>
+      <td style="color:var(--brand-green);font-weight:700;">₹{{ '{:,.0f}'.format(bk.agreed_price or 0) }}</td>
+      <td><span class="status-badge status-completed">Completed</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-wallet2"></i></div>
+    <div class="empty-state-title">No completed jobs yet</div>
+    <div class="empty-state-sub">Accept service requests to start earning.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

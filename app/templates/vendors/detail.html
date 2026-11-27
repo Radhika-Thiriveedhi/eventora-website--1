@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ vendor.business_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card p-4 mb-4">
+        <div class="d-flex align-items-center gap-4 pb-4 border-bottom" style="border-color: var(--slate-100)!important;">
+          <div class="vendor-avatar" style="width: 80px; height: 80px; font-size: 2rem;">
+            {{ vendor.business_name[0].upper() }}
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h2 style="font-weight: 800; color: var(--slate-900); margin: 0;">{{ vendor.business_name }}</h2>
+              {% if vendor.is_verified %}
+              <span style="color: var(--brand-green); font-size: 1.4rem;" title="Verified by Eventora"><i class="bi bi-patch-check-fill"></i></span>
+              {% endif %}
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <span class="vendor-cat-tag">{{ vendor.category|title if vendor.category else 'General' }}</span>
+              {% if vendor.location %}
+              <span style="font-size: 0.85rem; color: var(--slate-500);"><i class="bi bi-geo-alt me-1 text-amber"></i> {{ vendor.location }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="my-4">
+          <h5 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.75rem;">About the Vendor</h5>
+          <p style="color: var(--slate-700); line-height: 1.8;">
+            {{ vendor.description or 'A committed and professional vendor team ensuring high standards for every planned event.' }}
+          </p>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="pt-4 border-top" style="border-color: var(--slate-100)!important;">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 style="font-weight: 700; color: var(--slate-900); margin: 0;">Client Reviews ({{ reviews|length }})</h5>
+            <div class="d-flex align-items-center gap-1">
+              <div class="rating-stars">
+                {% for i in range(5) %}
+                  <i class="bi bi-star{% if i < (vendor.rating|int) %}-fill{% elif i < vendor.rating %}-half{% endif %}"></i>
+                {% endfor %}
+              </div>
+              <span style="font-weight: 700;">{{ '%.1f'|format(vendor.rating) }}</span>
+            </div>
+          </div>
+
+          {% if reviews %}
+          <div class="d-flex flex-column gap-3">
+            {% for r in reviews %}
+            <div class="p-3 rounded-3" style="background: var(--slate-50); border: 1px solid var(--slate-200);">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="rating-stars">
+                  {% for s in range(r.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                </span>
+                <span style="font-size: 0.75rem; color: var(--slate-400);">{{ r.created_at.strftime('%d %b %Y') }}</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--slate-700); margin: 0;">{{ r.comment }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-muted" style="font-size: 0.85rem;">No client reviews recorded yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Hire / Request Service Sidebar -->
+    <div class="col-lg-4">
+      <div class="card p-4 sticky-top" style="top: 90px;">
+        <h4 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.5rem;">Hire Vendor</h4>
+        <div class="d-flex align-items-baseline gap-2 mb-3">
+          <span style="font-size: 1.8rem; font-weight: 800; color: var(--brand-green);">
+            {% if vendor.base_price %}₹{{ '{:,.0f}'.format(vendor.base_price) }}{% else %}Custom{% endif %}
+          </span>
+          <span style="color: var(--slate-500); font-size: 0.85rem;">{{ vendor.price_unit or 'per event' }}</span>
+        </div>
+
+        {% if current_user.is_authenticated and current_user.role in ['organizer', 'admin'] %}
+        <form method="POST" action="{{ url_for('vendors.book_vendor', vid=vendor.id) }}">
+          <div class="mb-3">
+            <label class="form-label">Select Your Event *</label>
+            <select name="event_id" class="form-select" required>
+              <option value="">— Choose an Event —</option>
+              {% for ev in current_user.organized_events.all() %}
+              <option value="{{ ev.id }}">{{ ev.title }} ({{ ev.event_date.strftime('%d %b') }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Offered / Agreed Budget (₹)</label>
+            <input type="number" name="agreed_price" class="form-control" value="{{ vendor.base_price or '' }}" placeholder="Agreed compensation">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Scope of Work / Instructions</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="Specific expectations, setup timing, dietary restrictions..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-send me-1"></i> Send Service Request
+          </button>
+        </form>
+        {% elif current_user.is_authenticated %}
+        <div class="alert alert-info" style="font-size: 0.85rem;">
+          <i class="bi bi-info-circle me-1"></i> To hire vendors, please log in as an <b>Event Organizer</b>.
+        </div>
+        {% else %}
+        <a href="{{ url_for('auth.login', next=url_for('vendors.detail', vid=vendor.id)) }}" class="btn btn-primary w-100">
+          Log In as Organizer to Hire
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
