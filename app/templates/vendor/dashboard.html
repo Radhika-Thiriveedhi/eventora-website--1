@@ -1,0 +1,96 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Vendor Dashboard{% endblock %}
+{% block page_title %}Vendor Dashboard{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('vendors.dashboard') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('vendors.my_profile') }}" class="sidebar-link"><i class="bi bi-person-badge nav-icon"></i> My Profile</a>
+<a href="{{ url_for('vendors.requests') }}" class="sidebar-link"><i class="bi bi-inbox nav-icon"></i> Service Requests</a>
+<a href="{{ url_for('vendors.earnings') }}" class="sidebar-link"><i class="bi bi-wallet2 nav-icon"></i> Earnings</a>
+<a href="{{ url_for('notifications.index') }}" class="sidebar-link"><i class="bi bi-bell nav-icon"></i> Notifications</a>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Account</a>
+<a href="{{ url_for('public.home') }}" class="sidebar-link"><i class="bi bi-house nav-icon"></i> Public Site</a>
+{% endblock %}
+{% block content %}
+{% if profile %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">👋 Welcome, {{ current_user.name.split()[0] }}!</div>
+    <div class="page-header-sub">{{ profile.business_name }} — {{ profile.category|title }}</div>
+  </div>
+  {% if not profile.is_verified %}
+  <span class="badge" style="background:#fef3c7;color:#92400e;padding:.5rem 1rem;font-size:.82rem;">
+    <i class="bi bi-clock me-1"></i>Pending Verification
+  </span>
+  {% else %}
+  <span class="badge" style="background:#d1fae5;color:#065f46;padding:.5rem 1rem;font-size:.82rem;">
+    <i class="bi bi-patch-check-fill me-1"></i>Verified Vendor
+  </span>
+  {% endif %}
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card"><div class="stat-card-icon amber"><i class="bi bi-clock-history"></i></div>
+      <div><div class="stat-card-num">{{ pending }}</div><div class="stat-card-label">Pending Requests</div></div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card"><div class="stat-card-icon green"><i class="bi bi-check-circle"></i></div>
+      <div><div class="stat-card-num">{{ accepted }}</div><div class="stat-card-label">Active Jobs</div></div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card"><div class="stat-card-icon teal"><i class="bi bi-trophy"></i></div>
+      <div><div class="stat-card-num">{{ completed }}</div><div class="stat-card-label">Completed</div></div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card"><div class="stat-card-icon rose"><i class="bi bi-currency-rupee"></i></div>
+      <div><div class="stat-card-num">₹{{ '{:,.0f}'.format(total_earned) }}</div><div class="stat-card-label">Total Earned</div></div></div>
+  </div>
+</div>
+<div class="table-wrapper">
+  <div class="p-3 border-bottom d-flex justify-content-between" style="border-color:var(--slate-100)!important;">
+    <span style="font-weight:700;">Recent Service Requests</span>
+    <a href="{{ url_for('vendors.requests') }}" class="btn btn-outline-primary btn-sm">All Requests</a>
+  </div>
+  {% if recent_requests %}
+  <table class="table mb-0">
+    <thead><tr><th>Event</th><th>Date</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for req in recent_requests %}
+    <tr>
+      <td>
+        <div style="font-weight:600;font-size:.87rem;">{{ req.event.title }}</div>
+        <div style="font-size:.75rem;color:var(--slate-500);">By {{ req.event.organizer.name }}</div>
+      </td>
+      <td style="font-size:.82rem;color:var(--slate-600);">{{ req.service_date.strftime('%d %b %Y') if req.service_date else '—' }}</td>
+      <td style="color:var(--brand-green);font-weight:600;">₹{{ '{:,.0f}'.format(req.agreed_price or 0) }}</td>
+      <td><span class="status-badge status-{% if req.status=='accepted' %}ongoing{% elif req.status=='rejected' %}cancelled{% elif req.status=='completed' %}completed{% else %}planned{% endif %}" style="font-size:.7rem;">{{ req.status|title }}</span></td>
+      <td>
+        {% if req.status == 'pending' %}
+        <div class="d-flex gap-1">
+          <form method="POST" action="{{ url_for('vendors.respond_request', bid=req.id) }}">
+            <input type="hidden" name="action" value="accepted">
+            <button class="btn btn-success btn-sm">Accept</button>
+          </form>
+          <form method="POST" action="{{ url_for('vendors.respond_request', bid=req.id) }}">
+            <input type="hidden" name="action" value="rejected">
+            <button class="btn btn-sm btn-danger">Reject</button>
+          </form>
+        </div>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-inbox"></i></div><div class="empty-state-title">No requests yet</div></div>
+  {% endif %}
+</div>
+{% else %}
+<div class="empty-state" style="padding:4rem 0;">
+  <div class="empty-state-icon"><i class="bi bi-shop"></i></div>
+  <div class="empty-state-title">Set up your vendor profile</div>
+  <div class="empty-state-sub">Complete your profile to start receiving service requests from event organizers.</div>
+  <a href="{{ url_for('vendors.my_profile') }}" class="btn btn-primary mt-3">Complete Profile</a>
+</div>
+{% endif %}
+{% endblock %}
