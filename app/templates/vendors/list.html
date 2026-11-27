@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Explore Vendors{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white border-bottom" style="border-color: var(--slate-200)!important;">
+  <div class="container text-center">
+    <div class="section-label mb-2">Service Marketplace</div>
+    <h1 class="section-title">Verified Event Vendors</h1>
+    <p class="section-sub mx-auto">Caterers, photographers, decorators, sound engineers, and musicians ready for your big day.</p>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar mx-auto mt-4" style="max-width: 850px;">
+      <form method="GET" action="{{ url_for('vendors.index') }}" class="d-flex align-items-center gap-2 flex-wrap w-100">
+        <div class="search-input-wrap flex-grow-1">
+          <i class="bi bi-search"></i>
+          <input type="text" name="q" class="form-control" placeholder="Search vendors or service names..." value="{{ q or '' }}">
+        </div>
+        <select name="category" class="form-select" style="width: 200px;">
+          <option value="">All Services</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat|title }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        {% if q or category %}
+        <a href="{{ url_for('vendors.index') }}" class="btn btn-outline-secondary">Reset</a>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="py-5" style="background: var(--slate-50);">
+  <div class="container">
+    {% if vendors %}
+    <div class="row g-4">
+      {% for vd in vendors %}
+      <div class="col-sm-6 col-lg-4">
+        <div class="vendor-card h-100 d-flex flex-column">
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="vendor-avatar">{{ vd.business_name[0].upper() }}</div>
+            <div class="flex-grow-1">
+              <h5 style="font-weight: 700; color: var(--slate-900); margin-bottom: 2px;">{{ vd.business_name }}</h5>
+              <span class="vendor-cat-tag">{{ vd.category|title if vd.category else 'General' }}</span>
+            </div>
+            {% if vd.is_verified %}
+            <span title="Verified Partner" style="color: var(--brand-green); font-size: 1.25rem;"><i class="bi bi-patch-check-fill"></i></span>
+            {% endif %}
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--slate-600); line-height: 1.6; margin-bottom: 1rem;">
+            {{ (vd.description[:110] ~ '...') if vd.description and vd.description|length > 110 else (vd.description or 'Specialist event services company.') }}
+          </p>
+
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="rating-stars">
+              {% for i in range(5) %}
+                <i class="bi bi-star{% if i < (vd.rating|int) %}-fill{% elif i < vd.rating %}-half{% endif %}"></i>
+              {% endfor %}
+            </div>
+            <span style="font-weight: 700; font-size: 0.85rem;">{{ '%.1f'|format(vd.rating) }}</span>
+            <span style="color: var(--slate-400); font-size: 0.8rem;">({{ vd.total_reviews }} reviews)</span>
+          </div>
+
+          <div class="mt-auto d-flex align-items-center justify-content-between pt-3 border-top" style="border-color: var(--slate-100)!important;">
+            <div>
+              {% if vd.base_price %}
+              <div style="font-size: 1.05rem; font-weight: 700; color: var(--brand-green);">
+                ₹{{ '{:,.0f}'.format(vd.base_price) }}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--slate-400);">{{ vd.price_unit }}</div>
+              {% else %}
+              <span style="font-size: 0.85rem; color: var(--slate-500);">Custom Quote</span>
+              {% endif %}
+            </div>
+            <a href="{{ url_for('vendors.detail', vid=vd.id) }}" class="btn btn-outline-primary btn-sm">
+              View Profile
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state py-5 bg-white rounded-3 border">
+      <div class="empty-state-icon"><i class="bi bi-shop-window"></i></div>
+      <div class="empty-state-title">No vendors found</div>
+      <div class="empty-state-sub">Try broadening your search keywords or choosing all categories.</div>
+      <a href="{{ url_for('vendors.index') }}" class="btn btn-outline-primary btn-sm mt-3">Reset Filters</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
