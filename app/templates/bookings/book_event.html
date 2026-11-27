@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Book Tickets: {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 750px;">
+  <div class="text-center mb-4">
+    <div class="section-label mb-2">Checkout & Reservation</div>
+    <h2 style="font-family: var(--font-serif); font-size: 2rem; color: var(--slate-900);">Complete Your Booking</h2>
+    <p style="color: var(--slate-500);">Event: <b>{{ event.title }}</b></p>
+  </div>
+
+  <div class="form-card">
+    <div class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-4" style="background: var(--warm-100); border: 1px solid rgba(217,119,6,0.2);">
+      <div>
+        <div style="font-weight: 700; color: var(--slate-900); font-size: 1.05rem;">{{ event.title }}</div>
+        <div style="font-size: 0.85rem; color: var(--slate-600);"><i class="bi bi-calendar3 me-1"></i> {{ event.event_date.strftime('%d %B %Y, %I:%M %p') }}</div>
+        <div style="font-size: 0.85rem; color: var(--slate-600);"><i class="bi bi-geo-alt me-1"></i> {{ event.location or 'Venue TBD' }}</div>
+      </div>
+      <div class="text-end">
+        <div style="font-size: 0.8rem; color: var(--slate-500);">Price per seat</div>
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--brand-green);">
+          {% if event.ticket_price and event.ticket_price > 0 %}₹{{ '{:,.0f}'.format(event.ticket_price) }}{% else %}Free{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <label class="form-label">Attendee Name</label>
+          <input type="text" class="form-control" value="{{ current_user.name }}" disabled style="background: var(--slate-100);">
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Email Confirmation To</label>
+          <input type="email" class="form-control" value="{{ current_user.email }}" disabled style="background: var(--slate-100);">
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Number of Tickets *</label>
+          <input type="number" name="tickets" id="tickets" class="form-control" min="1" max="20" value="1" required onchange="calculateTotal()">
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label">Total Payable</label>
+          <input type="text" id="totalDisplay" class="form-control" readonly style="font-weight: 700; color: var(--brand-green); font-size: 1.1rem; background: var(--slate-50);">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Special Requests / Dietary / Accessibility Notes</label>
+          <textarea name="notes" class="form-control" rows="2" placeholder="Wheelchair access needed, pure vegetarian, etc..."></textarea>
+        </div>
+
+        <div class="col-12 mt-4">
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            <i class="bi bi-check2-circle me-1"></i> Confirm & Generate Ticket Receipt
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const price = {{ event.ticket_price or 0 }};
+function calculateTotal() {
+  const tickets = parseInt(document.getElementById('tickets').value) || 1;
+  const total = price * tickets;
+  document.getElementById('totalDisplay').value = total > 0 ? ('₹' + total.toLocaleString('en-IN')) : 'Free (₹0)';
+}
+calculateTotal();
+</script>
+{% endblock %}
