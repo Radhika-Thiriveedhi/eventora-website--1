@@ -10,12 +10,13 @@ def create_app(config_name='default'):
                 static_folder='../static')
     app.config.from_object(config[config_name])
 
+    # Ensure instance and upload folders exist
+    os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(app.config.get('UPLOAD_FOLDER', os.path.join(app.root_path, 'static', 'uploads')), exist_ok=True)
+
     # Init extensions
     db.init_app(app)
     login_manager.init_app(app)
-
-    # Ensure upload folder
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Register blueprints
     from app.public.routes import public_bp
