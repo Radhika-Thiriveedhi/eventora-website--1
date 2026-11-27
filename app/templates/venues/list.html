@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Explore Venues{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white border-bottom" style="border-color: var(--slate-200)!important;">
+  <div class="container text-center">
+    <div class="section-label mb-2">Curated Spaces</div>
+    <h1 class="section-title">Find the Perfect Venue</h1>
+    <p class="section-sub mx-auto">Banquet halls, open lawns, convention centers, and rooftop terraces.</p>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar mx-auto mt-4" style="max-width: 850px;">
+      <form method="GET" action="{{ url_for('venues.index') }}" class="d-flex align-items-center gap-2 flex-wrap w-100">
+        <div class="search-input-wrap flex-grow-1">
+          <i class="bi bi-search"></i>
+          <input type="text" name="q" class="form-control" placeholder="Search venues by name or description..." value="{{ q or '' }}">
+        </div>
+        <input type="text" name="city" class="form-control" placeholder="City (e.g. Mumbai)" value="{{ city or '' }}" style="width: 150px;">
+        <input type="number" name="capacity" class="form-control" placeholder="Min. Capacity" value="{{ cap or '' }}" style="width: 140px;">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        {% if q or city or cap %}
+        <a href="{{ url_for('venues.index') }}" class="btn btn-outline-secondary">Reset</a>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="py-5" style="background: var(--slate-50);">
+  <div class="container">
+    {% if venues %}
+    <div class="row g-4">
+      {% for v in venues %}
+      <div class="col-sm-6 col-lg-4">
+        <div class="venue-card h-100 d-flex flex-column">
+          <div class="venue-img">
+            <div style="width:100%;height:100%;background:linear-gradient(135deg, #1e293b, #0f3460);display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-building" style="font-size:3rem;color:rgba(255,255,255,.25);"></i>
+            </div>
+          </div>
+          <div class="p-4 d-flex flex-column flex-grow-1">
+            <h5 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.3rem;">{{ v.name }}</h5>
+            <div style="color: var(--slate-500); font-size: 0.85rem; margin-bottom: 0.75rem;">
+              <i class="bi bi-geo-alt text-amber me-1"></i> {{ v.city or v.address or 'Location TBD' }}
+            </div>
+            <p style="font-size: 0.85rem; color: var(--slate-600); line-height: 1.6; margin-bottom: 1rem;">
+              {{ (v.description[:110] ~ '...') if v.description and v.description|length > 110 else (v.description or 'A premier venue equipped for exceptional celebrations.') }}
+            </p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <span class="venue-cap-tag"><i class="bi bi-people"></i> Up to {{ v.capacity or '?' }} guests</span>
+              {% if v.facilities %}
+              <span class="venue-cap-tag" style="background: #f0fdf4; color: #166534;"><i class="bi bi-check-circle"></i> Equipped</span>
+              {% endif %}
+            </div>
+            <div class="mt-auto d-flex align-items-center justify-content-between pt-3 border-top" style="border-color: var(--slate-100)!important;">
+              <div>
+                <span style="font-size: 1.1rem; font-weight: 700; color: var(--brand-green);">
+                  {% if v.price_per_day %}₹{{ '{:,.0f}'.format(v.price_per_day) }}{% else %}Contact{% endif %}
+                </span>
+                <span style="font-size: 0.75rem; color: var(--slate-400);">/ day</span>
+              </div>
+              <a href="{{ url_for('venues.detail', vid=v.id) }}" class="btn btn-outline-primary btn-sm">
+                View & Book
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state py-5 bg-white rounded-3 border">
+      <div class="empty-state-icon"><i class="bi bi-building-x"></i></div>
+      <div class="empty-state-title">No venues found</div>
+      <div class="empty-state-sub">Try searching with lower capacity or a different city name.</div>
+      <a href="{{ url_for('venues.index') }}" class="btn btn-outline-primary btn-sm mt-3">Reset Filters</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
