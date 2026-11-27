@@ -1,0 +1,78 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Add Venue{% endblock %}
+{% block page_title %}Add New Venue{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{{ url_for('public.organizer_home') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('events.index') }}" class="sidebar-link"><i class="bi bi-calendar-event nav-icon"></i> My Events</a>
+<a href="{{ url_for('venues.index') }}" class="sidebar-link active"><i class="bi bi-building nav-icon"></i> Venues</a>
+<a href="{{ url_for('venues.my_bookings') }}" class="sidebar-link"><i class="bi bi-calendar-check nav-icon"></i> Venue Bookings</a>
+<a href="{{ url_for('vendors.index') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendors</a>
+<a href="{{ url_for('reports.index') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">List a Venue</div>
+    <div class="page-header-sub">Add venue specifications, capacity, and rental pricing.</div>
+  </div>
+  <a href="{{ url_for('venues.index') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+</div>
+
+<div class="form-card" style="max-width: 800px;">
+  <form method="POST">
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label">Venue Name *</label>
+        <input type="text" name="name" class="form-control" placeholder="e.g. Royal Crystal Banquet Hall" required>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="3" placeholder="Highlight space features, ambiance, and suitable occasions..."></textarea>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Address</label>
+        <input type="text" name="address" class="form-control" placeholder="Plot 42, Linking Road">
+      </div>
+      <div class="col-sm-3">
+        <label class="form-label">City</label>
+        <input type="text" name="city" class="form-control" placeholder="Mumbai">
+      </div>
+      <div class="col-sm-3">
+        <label class="form-label">State</label>
+        <input type="text" name="state" class="form-control" placeholder="Maharashtra">
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Guest Capacity</label>
+        <input type="number" name="capacity" class="form-control" placeholder="e.g. 500">
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Rental Price Per Day (₹)</label>
+        <input type="number" name="price_per_day" class="form-control" placeholder="75000">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Facilities (comma-separated)</label>
+        <input type="text" name="facilities" class="form-control" placeholder="Valet Parking, Central AC, Bridal Room, Generator Backup, Stage Lighting">
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Contact Person</label>
+        <input type="text" name="contact_name" class="form-control" placeholder="Suresh Mehta">
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Contact Phone</label>
+        <input type="tel" name="contact_phone" class="form-control" placeholder="+91 98765 00000">
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Contact Email</label>
+        <input type="email" name="contact_email" class="form-control" placeholder="manager@venue.com">
+      </div>
+      <div class="col-12 mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-building-add me-1"></i> Save & Publish Venue
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

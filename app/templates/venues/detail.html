@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card overflow-hidden mb-4">
+        <div style="height: 260px; background: linear-gradient(135deg, #1e293b, #0f3460); display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-building" style="font-size: 5rem; color: rgba(255,255,255,.2);"></i>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="venue-cap-tag"><i class="bi bi-people"></i> Capacity: {{ venue.capacity or 'Flexible' }} guests</span>
+            <span style="font-size: 1.4rem; font-weight: 800; color: var(--brand-green);">
+              {% if venue.price_per_day %}₹{{ '{:,.0f}'.format(venue.price_per_day) }} <small style="font-size: 0.8rem; color: var(--slate-500);">/ day</small>{% else %}Contact for Pricing{% endif %}
+            </span>
+          </div>
+
+          <h2 style="font-family: var(--font-serif); font-size: 2.2rem; color: var(--slate-900); margin-bottom: 0.5rem;">
+            {{ venue.name }}
+          </h2>
+          <div class="text-muted mb-4 pb-3 border-bottom">
+            <i class="bi bi-geo-alt text-amber me-1"></i> {{ venue.address }}{% if venue.city %}, {{ venue.city }}{% endif %}{% if venue.state %}, {{ venue.state }}{% endif %}
+          </div>
+
+          <h5 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.75rem;">Description</h5>
+          <p style="color: var(--slate-700); line-height: 1.8; margin-bottom: 1.5rem;">
+            {{ venue.description or 'A versatile venue perfect for corporate summits, wedding ceremonies, product launches, and private functions.' }}
+          </p>
+
+          {% if venue.facilities %}
+          <h5 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.75rem;">Amenities & Facilities</h5>
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            {% for fac in venue.facilities.split(',') %}
+            <span class="badge" style="background: var(--slate-100); color: var(--slate-700); font-size: 0.85rem; padding: 6px 12px; font-weight: 500;">
+              <i class="bi bi-check2 text-green me-1"></i> {{ fac.strip() }}
+            </span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="p-3 rounded-3" style="background: var(--slate-50); border: 1px solid var(--slate-200);">
+            <h6 style="font-weight: 700; margin-bottom: 0.5rem;">Direct Venue Contact</h6>
+            <div class="row g-2" style="font-size: 0.85rem; color: var(--slate-600);">
+              <div class="col-sm-4"><i class="bi bi-person me-1"></i> {{ venue.contact_name or 'Venue Manager' }}</div>
+              <div class="col-sm-4"><i class="bi bi-telephone me-1"></i> {{ venue.contact_phone or '+91 98765 43210' }}</div>
+              <div class="col-sm-4"><i class="bi bi-envelope me-1"></i> {{ venue.contact_email or 'venue@eventora.in' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking / Request Box -->
+    <div class="col-lg-4">
+      <div class="card p-4 sticky-top" style="top: 90px;">
+        <h4 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.5rem;">Reserve Venue</h4>
+        <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 1.25rem;">
+          Double-booking protection enabled. Our engine verifies date availability in real-time.
+        </p>
+
+        {% if current_user.is_authenticated and current_user.role in ['organizer', 'admin'] %}
+        <form method="POST" action="{{ url_for('venues.book', vid=venue.id) }}">
+          <div class="mb-3">
+            <label class="form-label">Check-in Date *</label>
+            <input type="date" name="start_date" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Check-out Date *</label>
+            <input type="date" name="end_date" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Special Notes / Requirements</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="Expected schedule, sound setup requirements..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-calendar-check me-1"></i> Submit Reservation Request
+          </button>
+        </form>
+        {% elif current_user.is_authenticated %}
+        <div class="alert alert-info" style="font-size: 0.85rem;">
+          <i class="bi bi-info-circle me-1"></i> Venue reservations require an <b>Organizer</b> or <b>Admin</b> account.
+        </div>
+        {% else %}
+        <a href="{{ url_for('auth.login', next=url_for('venues.detail', vid=venue.id)) }}" class="btn btn-primary w-100">
+          Log in as Organizer to Book
+        </a>
+        {% endif %}
+
+        {% if upcoming_bookings %}
+        <div class="mt-4 pt-3 border-top">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--slate-600); text-transform: uppercase; margin-bottom: 0.5rem;">
+            Reserved Dates (Unavailable)
+          </div>
+          <ul class="list-unstyled mb-0" style="font-size: 0.8rem; color: var(--brand-rose);">
+            {% for b in upcoming_bookings %}
+            <li><i class="bi bi-x-circle me-1"></i> {{ b.start_date.strftime('%d %b %Y') }} – {{ b.end_date.strftime('%d %b %Y') }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
