@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Dashboard{% endblock %} — Eventora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-text">Evento<span>ra</span></div>
+      <div class="sidebar-role-tag">{{ current_user.role.title() }}</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      {% block sidebar_nav %}{% endblock %}
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user-mini">
+        <div class="sidebar-user-avatar">{{ current_user.name[0].upper() }}</div>
+        <div>
+          <div class="sidebar-user-name">{{ current_user.name.split()[0] }}</div>
+          <div class="sidebar-user-role">{{ current_user.email }}</div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="ms-auto text-muted" title="Logout" style="font-size:1rem;opacity:.6;">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ── MAIN ── -->
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
+        <div>
+          <div class="top-bar-title">{% block page_title %}Dashboard{% endblock %}</div>
+        </div>
+      </div>
+      <div class="top-bar-actions">
+        <a href="{{ url_for('notifications.index') }}" class="notif-btn" title="Notifications">
+          <i class="bi bi-bell"></i>
+          <span class="notif-dot" id="notif-dot" style="display:none;"></span>
+        </a>
+        <a href="{{ url_for('auth.profile') }}" class="d-flex align-items-center gap-2 text-decoration-none" style="background:var(--slate-100);border-radius:var(--radius-sm);padding:.35rem .75rem;">
+          <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--brand-amber),var(--brand-green));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;">
+            {{ current_user.name[0].upper() }}
+          </div>
+          <span style="font-size:.85rem;font-weight:600;color:var(--slate-800);">{{ current_user.name.split()[0] }}</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="px-4 pt-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+              <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="page-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Sidebar toggle
+const toggle = document.getElementById('sidebarToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+if(toggle){
+  toggle.addEventListener('click',()=>{
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+  overlay.addEventListener('click',()=>{
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+}
+// Notifications
+fetch('/notifications/count').then(r=>r.json()).then(d=>{
+  const dot = document.getElementById('notif-dot');
+  if(dot && d.count>0) dot.style.display='';
+}).catch(()=>{});
+// Active sidebar link
+document.querySelectorAll('.sidebar-link').forEach(link=>{
+  if(link.href === window.location.href){
+    link.classList.add('active');
+  }
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
