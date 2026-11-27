@@ -1,0 +1,14 @@
+/* ── Chart containers ── */
+.chart-card {
+  background: #fff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+}
+.chart-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.chart-card-title { font-weight: 700; color: var(--slate-900); font-size: .97rem; }
+.chart-card-sub { color: var(--slate-400); font-size: .78rem; margin-top: 2px; }
+.chart-container { position: relative; }
