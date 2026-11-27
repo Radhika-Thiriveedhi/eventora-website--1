@@ -1,0 +1,88 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block sidebar_nav %}
+<div class="sidebar-section-label">Overview</div>
+<a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<div class="sidebar-section-label">Users & Platform</div>
+<a href="{{ url_for('admin.users') }}" class="sidebar-link active"><i class="bi bi-people nav-icon"></i> All Users</a>
+<a href="{{ url_for('admin.vendors') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendor Verification</a>
+<div class="sidebar-section-label">Events & Bookings</div>
+<a href="{{ url_for('admin.events') }}" class="sidebar-link"><i class="bi bi-calendar-event nav-icon"></i> All Events</a>
+<a href="{{ url_for('admin.bookings') }}" class="sidebar-link"><i class="bi bi-ticket nav-icon"></i> All Bookings</a>
+<div class="sidebar-section-label">Reports</div>
+<a href="{{ url_for('admin.reports') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+<a href="{{ url_for('admin.settings') }}" class="sidebar-link"><i class="bi bi-gear nav-icon"></i> Settings</a>
+<a href="{{ url_for('public.home') }}" class="sidebar-link"><i class="bi bi-house nav-icon"></i> Public Site</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">Users ({{ users|length }})</div>
+    <div class="page-header-sub">Manage all registered accounts on the platform.</div>
+  </div>
+</div>
+<div class="filter-bar mb-3">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap w-100">
+    <div class="search-input-wrap">
+      <i class="bi bi-search"></i>
+      <input name="q" class="form-control" placeholder="Search by name or email…" value="{{ q }}">
+    </div>
+    <select name="role" class="form-select" style="width:160px;">
+      <option value="">All Roles</option>
+      {% for r in ['admin','organizer','vendor','customer'] %}
+      <option value="{{ r }}" {% if role==r %}selected{% endif %}>{{ r|title }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{{ url_for('admin.users') }}" class="btn btn-sm" style="background:var(--slate-100);color:var(--slate-700);">Reset</a>
+  </form>
+</div>
+<div class="table-wrapper">
+  {% if users %}
+  <table class="table mb-0">
+    <thead><tr><th>User</th><th>Role</th><th>Phone</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+    <tr>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--brand-amber),var(--brand-green));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0;">{{ u.name[0].upper() }}</div>
+          <div>
+            <div style="font-weight:600;font-size:.87rem;color:var(--slate-900);">{{ u.name }}</div>
+            <div style="font-size:.75rem;color:var(--slate-500);">{{ u.email }}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="badge" style="background:{% if u.role=='admin' %}#ede9fe;color:#5b21b6{% elif u.role=='organizer' %}#fef3c7;color:#92400e{% elif u.role=='vendor' %}#d1fae5;color:#065f46{% else %}#e0f2fe;color:#075985{% endif %};">{{ u.role|title }}</span>
+      </td>
+      <td style="font-size:.85rem;color:var(--slate-600);">{{ u.phone or '—' }}</td>
+      <td>
+        {% if u.is_active %}
+        <span class="status-badge status-ongoing">Active</span>
+        {% else %}
+        <span class="status-badge status-cancelled">Inactive</span>
+        {% endif %}
+      </td>
+      <td style="font-size:.82rem;color:var(--slate-500);">{{ u.created_at.strftime('%d %b %Y') }}</td>
+      <td>
+        {% if u.role != 'admin' %}
+        <a href="{{ url_for('admin.toggle_user', uid=u.id) }}" class="btn btn-sm {% if u.is_active %}btn-outline-primary{% else %}btn-success{% endif %}" onclick="return confirm('Toggle user status?')">
+          {{ 'Deactivate' if u.is_active else 'Activate' }}
+        </a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-people"></i></div>
+    <div class="empty-state-title">No users found</div>
+    <div class="empty-state-sub">Try adjusting your filters</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

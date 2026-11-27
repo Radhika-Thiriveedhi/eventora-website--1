@@ -1,0 +1,137 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-section-label">Overview</div>
+<a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+  <i class="bi bi-grid nav-icon"></i> Dashboard
+</a>
+<div class="sidebar-section-label">Users & Platform</div>
+<a href="{{ url_for('admin.users') }}" class="sidebar-link">
+  <i class="bi bi-people nav-icon"></i> All Users
+</a>
+<a href="{{ url_for('admin.vendors') }}" class="sidebar-link">
+  <i class="bi bi-shop nav-icon"></i> Vendor Verification
+</a>
+<div class="sidebar-section-label">Events & Bookings</div>
+<a href="{{ url_for('admin.events') }}" class="sidebar-link">
+  <i class="bi bi-calendar-event nav-icon"></i> All Events
+</a>
+<a href="{{ url_for('admin.bookings') }}" class="sidebar-link">
+  <i class="bi bi-ticket nav-icon"></i> All Bookings
+</a>
+<div class="sidebar-section-label">Reports</div>
+<a href="{{ url_for('admin.reports') }}" class="sidebar-link">
+  <i class="bi bi-graph-up nav-icon"></i> Platform Reports
+</a>
+<a href="{{ url_for('admin.settings') }}" class="sidebar-link">
+  <i class="bi bi-gear nav-icon"></i> Settings
+</a>
+<div class="sidebar-section-label">Account</div>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Profile</a>
+<a href="{{ url_for('public.home') }}" class="sidebar-link"><i class="bi bi-house nav-icon"></i> Public Site</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">Platform Overview</div>
+    <div class="page-header-sub">Monitor all activity on Eventora in real time.</div>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-2-4">
+    <div class="stat-card">
+      <div class="stat-card-icon amber"><i class="bi bi-people-fill"></i></div>
+      <div><div class="stat-card-num">{{ total_users }}</div><div class="stat-card-label">Total Users</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2-4">
+    <div class="stat-card">
+      <div class="stat-card-icon green"><i class="bi bi-calendar-event-fill"></i></div>
+      <div><div class="stat-card-num">{{ total_events }}</div><div class="stat-card-label">Total Events</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2-4">
+    <div class="stat-card">
+      <div class="stat-card-icon rose"><i class="bi bi-ticket-fill"></i></div>
+      <div><div class="stat-card-num">{{ total_bookings }}</div><div class="stat-card-label">Bookings</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2-4">
+    <div class="stat-card">
+      <div class="stat-card-icon teal"><i class="bi bi-shop"></i></div>
+      <div><div class="stat-card-num">{{ total_vendors }}</div><div class="stat-card-label">Vendors</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2-4">
+    <div class="stat-card">
+      <div class="stat-card-icon purple"><i class="bi bi-currency-rupee"></i></div>
+      <div><div class="stat-card-num">₹{{ '{:,.0f}'.format(revenue) }}</div><div class="stat-card-label">Revenue</div></div>
+    </div>
+  </div>
+</div>
+
+<style>.col-lg-2-4{flex:0 0 auto;width:20%;} @media(max-width:991px){.col-lg-2-4{width:50%;}}</style>
+
+{% if pending_vendors > 0 %}
+<div class="alert alert-warning d-flex align-items-center gap-2 mb-4" style="border-left:4px solid var(--brand-amber);">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <span><b>{{ pending_vendors }}</b> vendor(s) are waiting for verification.</span>
+  <a href="{{ url_for('admin.vendors') }}" class="btn btn-warning btn-sm ms-auto">Review Now</a>
+</div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="table-wrapper">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color:var(--slate-100)!important;">
+        <span style="font-weight:700;">Recent Bookings</span>
+        <a href="{{ url_for('admin.bookings') }}" class="btn btn-outline-primary btn-sm">All Bookings</a>
+      </div>
+      {% if recent_bookings %}
+      <table class="table mb-0">
+        <thead><tr><th>Ref</th><th>Event</th><th>Customer</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for bk in recent_bookings %}
+        <tr>
+          <td style="font-size:.8rem;color:var(--slate-500);font-family:monospace;">{{ bk.booking_ref }}</td>
+          <td style="font-size:.85rem;font-weight:600;">{{ bk.event.title[:20] }}…</td>
+          <td style="font-size:.82rem;color:var(--slate-600);">{{ bk.customer.name }}</td>
+          <td><span class="status-badge status-{{ bk.status }}" style="font-size:.7rem;">{{ bk.status }}</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-ticket-perforated"></i></div><div class="empty-state-title">No bookings yet</div></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="table-wrapper">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color:var(--slate-100)!important;">
+        <span style="font-weight:700;">Recent Users</span>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary btn-sm">All Users</a>
+      </div>
+      <div class="p-2">
+        {% for u in recent_users %}
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;border-bottom:1px solid var(--slate-100);">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--brand-amber),var(--brand-green));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0;">
+            {{ u.name[0].upper() }}
+          </div>
+          <div class="flex-grow-1">
+            <div style="font-weight:600;font-size:.85rem;color:var(--slate-900);">{{ u.name }}</div>
+            <div style="font-size:.75rem;color:var(--slate-500);">{{ u.email }}</div>
+          </div>
+          <span class="badge" style="background:{% if u.role=='admin' %}#ede9fe;color:#5b21b6{% elif u.role=='organizer' %}#fef3c7;color:#92400e{% elif u.role=='vendor' %}#d1fae5;color:#065f46{% else %}#e0f2fe;color:#075985{% endif %};">{{ u.role|title }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}All Bookings – Admin | TripMate{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <span class="badge-tm badge-tm-amber mb-1">Financial Transactions</span>
+    <h2 class="fw-bold mb-0">Global Platform Bookings</h2>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table-tm">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Customer</th>
+          <th>Package / Tour</th>
+          <th>Travel Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+          <tr>
+            <td><span class="font-monospace fw-bold" style="color: var(--tm-primary);">{{ b.booking_reference }}</span></td>
+            <td>{{ b.traveler.name }}</td>
+            <td>{{ b.package.title }}</td>
+            <td>{{ b.travel_date|date_format }}</td>
+            <td><strong>{{ b.total_amount|currency }}</strong></td>
+            <td><span class="badge-tm badge-tm-success">{{ b.status }}</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
