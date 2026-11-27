@@ -1,0 +1,119 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Create Event{% endblock %}
+{% block page_title %}Create New Event{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('public.organizer_home') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('events.index') }}" class="sidebar-link"><i class="bi bi-calendar-event nav-icon"></i> My Events</a>
+<a href="{{ url_for('events.create') }}" class="sidebar-link active"><i class="bi bi-plus-circle nav-icon"></i> Create Event</a>
+<a href="{{ url_for('events.calendar') }}" class="sidebar-link"><i class="bi bi-calendar3 nav-icon"></i> Calendar</a>
+<a href="{{ url_for('venues.index') }}" class="sidebar-link"><i class="bi bi-building nav-icon"></i> Venues</a>
+<a href="{{ url_for('vendors.index') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendors</a>
+<a href="{{ url_for('bookings.index') }}" class="sidebar-link"><i class="bi bi-ticket nav-icon"></i> Bookings</a>
+<a href="{{ url_for('reports.index') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Profile</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">Create New Event</div>
+    <div class="page-header-sub">Fill in the details to publish your event.</div>
+  </div>
+  <a href="{{ url_for('events.index') }}" class="btn btn-sm" style="background:var(--slate-100);color:var(--slate-700);"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <form method="POST">
+      <div class="form-card mb-3">
+        <h6 class="fw-bold mb-3" style="color:var(--slate-900);">Basic Information</h6>
+        <div class="mb-3">
+          <label class="form-label">Event Title <span style="color:var(--brand-rose);">*</span></label>
+          <input type="text" name="title" class="form-control" placeholder="e.g. Annual Gala Dinner 2025" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="4" placeholder="Tell people what this event is about…"></textarea>
+        </div>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+              {% for cat in ['wedding','birthday','corporate','concert','fest','launch','other'] %}
+              <option value="{{ cat }}">{{ cat|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              <option value="draft">Draft</option>
+              <option value="planned" selected>Planned</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="form-card mb-3">
+        <h6 class="fw-bold mb-3" style="color:var(--slate-900);">Date, Time & Location</h6>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label">Event Start <span style="color:var(--brand-rose);">*</span></label>
+            <input type="datetime-local" name="event_date" class="form-control" required>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Event End</label>
+            <input type="datetime-local" name="end_date" class="form-control">
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="form-label">Location / Address</label>
+          <input type="text" name="location" class="form-control" placeholder="Hotel Grand, Bandra, Mumbai">
+        </div>
+        <div class="mt-3">
+          <label class="form-label">Venue (Optional)</label>
+          <select name="venue_id" class="form-select">
+            <option value="">— Select Venue (optional) —</option>
+            {% for v in venues %}
+            <option value="{{ v.id }}">{{ v.name }} ({{ v.city or v.address }}) — Cap: {{ v.capacity or '?' }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-card mb-3">
+        <h6 class="fw-bold mb-3" style="color:var(--slate-900);">Tickets & Attendance</h6>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label">Expected Attendees</label>
+            <input type="number" name="expected_attendees" class="form-control" placeholder="200" min="1">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Ticket Price (₹)</label>
+            <div class="input-group">
+              <span class="input-group-text" style="border-color:var(--slate-200);background:var(--slate-50);">₹</span>
+              <input type="number" name="ticket_price" class="form-control" placeholder="0 for free" min="0" step="0.01" value="0">
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 form-check">
+          <input type="checkbox" class="form-check-input" name="is_public" id="isPublic" checked style="accent-color:var(--brand-amber);">
+          <label class="form-check-label" for="isPublic" style="font-size:.88rem;">Make this event visible on the public site</label>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Create Event</button>
+        <a href="{{ url_for('events.index') }}" class="btn" style="background:var(--slate-100);color:var(--slate-700);">Cancel</a>
+      </div>
+    </form>
+  </div>
+  <div class="col-lg-4">
+    <div class="form-card" style="background:var(--warm-100);border-color:var(--brand-amber);border-width:1.5px;">
+      <h6 class="fw-bold mb-3" style="color:var(--slate-900);">💡 Tips</h6>
+      <ul style="font-size:.85rem;color:var(--slate-600);line-height:1.8;padding-left:1.2rem;">
+        <li>Add a clear, descriptive title so guests can find your event easily.</li>
+        <li>Set the status to <b>Planned</b> when you're ready to accept bookings.</li>
+        <li>Link a venue to prevent double-bookings.</li>
+        <li>Use ₹0 for free events — no ticket price needed.</li>
+        <li>After creating, you can add budget, guests, and vendors.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

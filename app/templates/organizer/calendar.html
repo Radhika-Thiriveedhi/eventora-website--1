@@ -1,0 +1,48 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Event Calendar{% endblock %}
+{% block page_title %}Event Calendar{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('public.organizer_home') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('events.index') }}" class="sidebar-link"><i class="bi bi-calendar-event nav-icon"></i> My Events</a>
+<a href="{{ url_for('events.create') }}" class="sidebar-link"><i class="bi bi-plus-circle nav-icon"></i> Create Event</a>
+<a href="{{ url_for('events.calendar') }}" class="sidebar-link active"><i class="bi bi-calendar3 nav-icon"></i> Calendar</a>
+<a href="{{ url_for('venues.index') }}" class="sidebar-link"><i class="bi bi-building nav-icon"></i> Venues</a>
+<a href="{{ url_for('vendors.index') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendors</a>
+<a href="{{ url_for('reports.index') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Profile</a>
+{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title">Event Calendar</div>
+  <a href="{{ url_for('events.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New Event</a>
+</div>
+<div class="form-card">
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;font-size:.8rem;">
+    {% for status, color, label in [('draft','#94a3b8','Draft'),('planned','#f59e0b','Planned'),('ongoing','#10b981','Ongoing'),('completed','#6366f1','Completed'),('cancelled','#ef4444','Cancelled')] %}
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:3px;background:{{ color }};display:inline-block;"></span>{{ label }}</span>
+    {% endfor %}
+  </div>
+  <div id="calendar" style="font-family:var(--font-sans);"></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('calendar');
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    headerToolbar: {left:'prev,next today',center:'title',right:'dayGridMonth,timeGridWeek,listMonth'},
+    events: {{ events_json|safe }},
+    eventClick: function(info) { window.location.href = info.event.url; info.jsEvent.preventDefault(); },
+    height: 'auto',
+    eventBorderColor: 'transparent',
+    eventTextColor: '#fff',
+  });
+  calendar.render();
+});
+</script>
+{% endblock %}
