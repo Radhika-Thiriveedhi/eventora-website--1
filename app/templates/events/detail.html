@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Event Hero Card -->
+      <div class="card overflow-hidden mb-4">
+        <div style="height: 260px; background: linear-gradient(135deg,
+          {% if event.category=='wedding' %}#92400e,#d97706
+          {% elif event.category=='corporate' %}#1e3a5f,#2563eb
+          {% elif event.category=='concert' %}#3b0764,#7c3aed
+          {% elif event.category=='birthday' %}#831843,#e11d48
+          {% else %}#134e4a,#059669{% endif %});
+          display: flex; align-items: center; justify-content: center; position: relative;">
+          <i class="bi bi-{% if event.category=='wedding' %}heart{% elif event.category=='corporate' %}briefcase{% elif event.category=='concert' %}music-note-beamed{% elif event.category=='birthday' %}gift{% else %}calendar-event{% endif %}" style="font-size: 5rem; color: rgba(255,255,255,.25);"></i>
+          <span class="event-cat-badge" style="position: absolute; top: 20px; left: 20px; font-size: 0.85rem;">{{ event.category|title if event.category else 'Event' }}</span>
+          <span class="status-badge status-{{ event.status }}" style="position: absolute; top: 20px; right: 20px; font-size: 0.85rem;">{{ event.status|title }}</span>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-amber fw-semibold mb-2" style="font-size: 0.95rem;">
+            <i class="bi bi-calendar-event"></i>
+            {{ event.event_date.strftime('%A, %d %B %Y at %I:%M %p') }}
+            {% if event.end_date %} – {{ event.end_date.strftime('%I:%M %p') }}{% endif %}
+          </div>
+          <h2 style="font-family: var(--font-serif); font-size: 2.2rem; color: var(--slate-900); margin-bottom: 1rem;">
+            {{ event.title }}
+          </h2>
+          <div class="d-flex align-items-center gap-3 text-muted mb-4 pb-3 border-bottom" style="font-size: 0.9rem;">
+            <div><i class="bi bi-geo-alt me-1 text-danger"></i> {{ event.location or 'Location TBD' }}</div>
+            {% if event.expected_attendees %}
+            <div><i class="bi bi-people me-1 text-primary"></i> Cap: {{ event.expected_attendees }} attendees</div>
+            {% endif %}
+            <div><i class="bi bi-person me-1"></i> Host: {{ event.organizer.name }}</div>
+          </div>
+
+          <h5 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.75rem;">About This Event</h5>
+          <p style="color: var(--slate-700); line-height: 1.8; font-size: 1rem; white-space: pre-line;">
+            {{ event.description or 'No specific description provided for this event.' }}
+          </p>
+
+          {% if event.venue %}
+          <div class="p-3 rounded-3 mt-4" style="background: var(--warm-100); border: 1px solid rgba(217,119,6,0.2);">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--brand-amber-d);">Hosted At Official Venue</span>
+                <h5 style="font-weight: 700; margin: 2px 0 0;">{{ event.venue.name }}</h5>
+                <div style="font-size: 0.85rem; color: var(--slate-600);"><i class="bi bi-geo-alt me-1"></i> {{ event.venue.city or event.venue.address }}</div>
+              </div>
+              <a href="{{ url_for('venues.detail', vid=event.venue.id) }}" class="btn btn-outline-primary btn-sm">Venue Details</a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Sidebar Card -->
+    <div class="col-lg-4">
+      <div class="card p-4 sticky-top" style="top: 90px;">
+        <h4 style="font-weight: 700; color: var(--slate-900); margin-bottom: 0.5rem;">Reserve Your Spot</h4>
+        <div class="d-flex align-items-baseline gap-2 mb-3">
+          <span style="font-size: 2rem; font-weight: 800; color: var(--brand-green);">
+            {% if event.ticket_price and event.ticket_price > 0 %}₹{{ '{:,.0f}'.format(event.ticket_price) }}{% else %}Free{% endif %}
+          </span>
+          <span style="color: var(--slate-500); font-size: 0.85rem;">/ ticket</span>
+        </div>
+
+        {% if event.status in ['planned', 'ongoing'] %}
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('bookings.book_event', eid=event.id) }}" class="btn btn-primary btn-lg w-100 mb-2">
+              <i class="bi bi-ticket-perforated me-2"></i> Book Tickets Now
+            </a>
+          {% else %}
+            <a href="{{ url_for('auth.login', next=url_for('bookings.book_event', eid=event.id)) }}" class="btn btn-primary btn-lg w-100 mb-2">
+              Log in to Book
+            </a>
+            <div class="text-center" style="font-size: 0.8rem; color: var(--slate-500);">
+              Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-amber fw-semibold">Sign up</a>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="alert alert-warning mb-0 text-center">
+            Bookings are currently unavailable (Status: {{ event.status|title }})
+          </div>
+        {% endif %}
+
+        <hr class="my-4">
+        <div class="d-flex flex-column gap-2" style="font-size: 0.85rem; color: var(--slate-600);">
+          <div><i class="bi bi-shield-check text-green me-2"></i> Verified event details</div>
+          <div><i class="bi bi-envelope-check text-green me-2"></i> Instant digital booking receipt</div>
+          <div><i class="bi bi-qr-code text-green me-2"></i> Easy check-in at entry</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

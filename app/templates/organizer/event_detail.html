@@ -1,0 +1,153 @@
+{% extends "dashboard_base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block page_title %}Event Detail{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('public.organizer_home') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('events.index') }}" class="sidebar-link active"><i class="bi bi-calendar-event nav-icon"></i> My Events</a>
+<a href="{{ url_for('events.create') }}" class="sidebar-link"><i class="bi bi-plus-circle nav-icon"></i> Create Event</a>
+<a href="{{ url_for('events.calendar') }}" class="sidebar-link"><i class="bi bi-calendar3 nav-icon"></i> Calendar</a>
+<a href="{{ url_for('venues.index') }}" class="sidebar-link"><i class="bi bi-building nav-icon"></i> Venues</a>
+<a href="{{ url_for('vendors.index') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendors</a>
+<a href="{{ url_for('bookings.index') }}" class="sidebar-link"><i class="bi bi-ticket nav-icon"></i> Bookings</a>
+<a href="{{ url_for('reports.index') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Profile</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">{{ event.title }}</div>
+    <div class="page-header-sub">{{ event.event_date.strftime('%d %B %Y, %I:%M %p') }} · {{ event.location or 'No location set' }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <span class="status-badge status-{{ event.status }}">{{ event.status|title }}</span>
+    <a href="{{ url_for('events.edit', eid=event.id) }}" class="btn btn-sm" style="background:var(--slate-100);color:var(--slate-700);"><i class="bi bi-pencil me-1"></i>Edit</a>
+    <form method="POST" action="{{ url_for('events.delete', eid=event.id) }}" onsubmit="return confirm('Delete this event?')">
+      <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash me-1"></i>Delete</button>
+    </form>
+  </div>
+</div>
+
+<!-- Quick nav tabs -->
+<ul class="nav nav-tabs mb-4" style="border-color:var(--slate-200);">
+  {% for tab, label, icon in [
+    ('details','Overview','bi-info-circle'),
+    ('budget','Budget','bi-currency-rupee'),
+    ('guests','Guests','bi-people'),
+    ('vendors','Vendors','bi-shop'),
+    ('reports','Report','bi-graph-up')
+  ] %}
+  <li class="nav-item">
+    <a class="nav-link {% if loop.first %}active{% endif %}" href="#{{ tab }}" data-bs-toggle="tab" style="font-size:.88rem;color:var(--slate-600);font-weight:500;">
+      <i class="bi {{ icon }} me-1"></i>{{ label }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <!-- Overview -->
+  <div class="tab-pane fade show active" id="details">
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="form-card mb-3">
+          <h6 class="fw-bold mb-3">Event Information</h6>
+          <p style="color:var(--slate-600);line-height:1.7;">{{ event.description or 'No description added yet.' }}</p>
+          <div class="row g-3 mt-2">
+            <div class="col-sm-6"><label class="form-label">Category</label><div class="form-control-plaintext">{{ event.category|title if event.category else '—' }}</div></div>
+            <div class="col-sm-6"><label class="form-label">Expected Attendees</label><div class="form-control-plaintext">{{ event.expected_attendees or '—' }}</div></div>
+            <div class="col-sm-6"><label class="form-label">Ticket Price</label><div class="form-control-plaintext">{{ '₹' ~ '{:,.0f}'.format(event.ticket_price) if event.ticket_price else 'Free' }}</div></div>
+            <div class="col-sm-6"><label class="form-label">Public Visibility</label><div class="form-control-plaintext">{{ '✅ Public' if event.is_public else '🔒 Private' }}</div></div>
+          </div>
+        </div>
+        <!-- Bookings -->
+        <div class="table-wrapper">
+          <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color:var(--slate-100)!important;">
+            <span style="font-weight:700;">Bookings ({{ bookings|length }})</span>
+          </div>
+          {% if bookings %}
+          <table class="table mb-0">
+            <thead><tr><th>Ref</th><th>Customer</th><th>Tickets</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for bk in bookings %}
+            <tr>
+              <td style="font-family:monospace;font-size:.78rem;color:var(--slate-500);">{{ bk.booking_ref }}</td>
+              <td style="font-size:.85rem;font-weight:600;">{{ bk.customer.name }}</td>
+              <td>{{ bk.tickets }}</td>
+              <td style="color:var(--brand-green);font-weight:600;">₹{{ '{:,.0f}'.format(bk.total_amount or 0) }}</td>
+              <td><span class="status-badge status-{{ bk.status }}" style="font-size:.7rem;">{{ bk.status }}</span></td>
+              <td>
+                {% if bk.status == 'pending' %}
+                <form method="POST" action="{{ url_for('bookings.confirm', bid=bk.id) }}" style="display:inline;">
+                  <button class="btn btn-success btn-sm">Confirm</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-ticket-perforated"></i></div><div class="empty-state-title">No bookings yet</div></div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="form-card mb-3">
+          <h6 class="fw-bold mb-3">Quick Actions</h6>
+          <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('budget.view', eid=event.id) }}" class="btn" style="background:var(--slate-100);color:var(--slate-800);text-align:left;"><i class="bi bi-currency-rupee me-2 text-amber"></i>Manage Budget</a>
+            <a href="{{ url_for('guests.list_guests', eid=event.id) }}" class="btn" style="background:var(--slate-100);color:var(--slate-800);text-align:left;"><i class="bi bi-people me-2 text-green"></i>Guest List</a>
+            <a href="{{ url_for('vendors.index') }}" class="btn" style="background:var(--slate-100);color:var(--slate-800);text-align:left;"><i class="bi bi-shop me-2 text-rose"></i>Find Vendors</a>
+            <a href="{{ url_for('reports.event_report', eid=event.id) }}" class="btn" style="background:var(--slate-100);color:var(--slate-800);text-align:left;"><i class="bi bi-graph-up me-2" style="color:var(--brand-purple);"></i>View Report</a>
+          </div>
+        </div>
+        <!-- Vendor Bookings summary -->
+        <div class="form-card">
+          <h6 class="fw-bold mb-3">Vendor Requests ({{ vendor_bookings|length }})</h6>
+          {% for vb in vendor_bookings %}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--slate-100);">
+            <div>
+              <div style="font-size:.85rem;font-weight:600;">{{ vb.vendor_profile.business_name }}</div>
+              <div style="font-size:.75rem;color:var(--slate-500);">{{ vb.vendor_profile.category|title }}</div>
+            </div>
+            <span class="status-badge status-{% if vb.status=='accepted' %}ongoing{% elif vb.status=='rejected' %}cancelled{% else %}planned{% endif %}" style="font-size:.7rem;">{{ vb.status|title }}</span>
+          </div>
+          {% else %}
+          <div style="font-size:.85rem;color:var(--slate-400);">No vendor requests yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget tab redirect message -->
+  <div class="tab-pane fade" id="budget">
+    <div class="text-center py-4">
+      <i class="bi bi-currency-rupee" style="font-size:3rem;color:var(--brand-amber);"></i>
+      <div class="mt-2 fw-bold">Manage Budget & Expenses</div>
+      <a href="{{ url_for('budget.view', eid=event.id) }}" class="btn btn-primary mt-3">Open Budget Manager</a>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="guests">
+    <div class="text-center py-4">
+      <i class="bi bi-people" style="font-size:3rem;color:var(--brand-green);"></i>
+      <div class="mt-2 fw-bold">Manage Guest List & Invitations</div>
+      <a href="{{ url_for('guests.list_guests', eid=event.id) }}" class="btn btn-primary mt-3">Open Guest Manager</a>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="vendors">
+    <div class="text-center py-4">
+      <i class="bi bi-shop" style="font-size:3rem;color:var(--brand-rose);"></i>
+      <div class="mt-2 fw-bold">Find and assign vendors for this event</div>
+      <a href="{{ url_for('vendors.index') }}" class="btn btn-primary mt-3">Browse Vendors</a>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="reports">
+    <div class="text-center py-4">
+      <i class="bi bi-graph-up" style="font-size:3rem;color:var(--brand-purple);"></i>
+      <div class="mt-2 fw-bold">View Full Event Analytics</div>
+      <a href="{{ url_for('reports.event_report', eid=event.id) }}" class="btn btn-primary mt-3">Open Report</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

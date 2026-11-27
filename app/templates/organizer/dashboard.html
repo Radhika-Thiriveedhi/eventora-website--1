@@ -1,0 +1,169 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Organizer Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-section-label">Overview</div>
+<a href="{{ url_for('public.organizer_home') }}" class="sidebar-link">
+  <i class="bi bi-grid nav-icon"></i> Dashboard
+</a>
+<div class="sidebar-section-label">Events</div>
+<a href="{{ url_for('events.index') }}" class="sidebar-link">
+  <i class="bi bi-calendar-event nav-icon"></i> My Events
+</a>
+<a href="{{ url_for('events.create') }}" class="sidebar-link">
+  <i class="bi bi-plus-circle nav-icon"></i> Create Event
+</a>
+<a href="{{ url_for('events.calendar') }}" class="sidebar-link">
+  <i class="bi bi-calendar3 nav-icon"></i> Calendar
+</a>
+<div class="sidebar-section-label">Manage</div>
+<a href="{{ url_for('venues.index') }}" class="sidebar-link">
+  <i class="bi bi-building nav-icon"></i> Venues
+</a>
+<a href="{{ url_for('vendors.index') }}" class="sidebar-link">
+  <i class="bi bi-shop nav-icon"></i> Vendors
+</a>
+<a href="{{ url_for('bookings.index') }}" class="sidebar-link">
+  <i class="bi bi-ticket nav-icon"></i> Bookings
+</a>
+<div class="sidebar-section-label">Finance & Guests</div>
+<a href="{{ url_for('reports.index') }}" class="sidebar-link">
+  <i class="bi bi-graph-up nav-icon"></i> Reports
+</a>
+<a href="{{ url_for('notifications.index') }}" class="sidebar-link">
+  <i class="bi bi-bell nav-icon"></i> Notifications
+  {% if unread %}<span class="sidebar-badge">{{ unread }}</span>{% endif %}
+</a>
+<div class="sidebar-section-label">Account</div>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link">
+  <i class="bi bi-person nav-icon"></i> Profile
+</a>
+<a href="{{ url_for('public.home') }}" class="sidebar-link">
+  <i class="bi bi-house nav-icon"></i> Public Site
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">👋 Welcome back, {{ current_user.name.split()[0] }}!</div>
+    <div class="page-header-sub">Here's what's happening with your events today.</div>
+  </div>
+  <a href="{{ url_for('events.create') }}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i> New Event
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-card-icon amber"><i class="bi bi-calendar-event-fill"></i></div>
+      <div>
+        <div class="stat-card-num">{{ total_events }}</div>
+        <div class="stat-card-label">Total Events</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-card-icon green"><i class="bi bi-ticket-fill"></i></div>
+      <div>
+        <div class="stat-card-num">{{ total_bookings }}</div>
+        <div class="stat-card-label">Total Bookings</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-card-icon rose"><i class="bi bi-people-fill"></i></div>
+      <div>
+        <div class="stat-card-num">{{ total_guests }}</div>
+        <div class="stat-card-label">Total Guests</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-card-icon purple"><i class="bi bi-clock-history"></i></div>
+      <div>
+        <div class="stat-card-num">{{ pending_requests }}</div>
+        <div class="stat-card-label">Pending Vendor Req.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Recent Events -->
+  <div class="col-lg-7">
+    <div class="table-wrapper">
+      <div class="d-flex align-items-center justify-content-between p-3 border-bottom" style="border-color:var(--slate-100)!important;">
+        <div style="font-weight:700;color:var(--slate-900);">My Recent Events</div>
+        <a href="{{ url_for('events.index') }}" class="btn btn-outline-primary btn-sm">View All</a>
+      </div>
+      {% if events %}
+      <table class="table mb-0">
+        <thead><tr>
+          <th>Event</th><th>Date</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+        {% for ev in events %}
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--slate-900);">{{ ev.title }}</div>
+            <div style="font-size:.78rem;color:var(--slate-500);">{{ ev.category|title if ev.category else '—' }}</div>
+          </td>
+          <td style="font-size:.85rem;color:var(--slate-600);">{{ ev.event_date.strftime('%d %b %Y') }}</td>
+          <td><span class="status-badge status-{{ ev.status }}">{{ ev.status|title }}</span></td>
+          <td>
+            <a href="{{ url_for('events.detail', eid=ev.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+        <div class="empty-state-title">No events yet</div>
+        <div class="empty-state-sub">Create your first event to get started</div>
+        <a href="{{ url_for('events.create') }}" class="btn btn-primary btn-sm mt-3">Create Event</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Bookings -->
+  <div class="col-lg-5">
+    <div class="table-wrapper">
+      <div class="d-flex align-items-center justify-content-between p-3 border-bottom" style="border-color:var(--slate-100)!important;">
+        <div style="font-weight:700;color:var(--slate-900);">Recent Bookings</div>
+        <a href="{{ url_for('bookings.index') }}" class="btn btn-outline-primary btn-sm">View All</a>
+      </div>
+      {% if recent_bookings %}
+      <div class="p-2">
+        {% for bk in recent_bookings %}
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.7rem .6rem;border-bottom:1px solid var(--slate-100);">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--slate-100);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:var(--slate-600);flex-shrink:0;">
+            {{ bk.customer.name[0].upper() }}
+          </div>
+          <div class="flex-grow-1">
+            <div style="font-weight:600;font-size:.85rem;color:var(--slate-900);">{{ bk.customer.name }}</div>
+            <div style="font-size:.75rem;color:var(--slate-500);">{{ bk.event.title[:30] }}… · {{ bk.tickets }} ticket(s)</div>
+          </div>
+          <span class="status-badge status-{{ bk.status }}" style="font-size:.7rem;">{{ bk.status }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-ticket-perforated"></i></div>
+        <div class="empty-state-title">No bookings yet</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

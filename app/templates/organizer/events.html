@@ -1,0 +1,67 @@
+{% extends "dashboard_base.html" %}
+{% block title %}My Events{% endblock %}
+{% block page_title %}My Events{% endblock %}
+{% block sidebar_nav %}
+<a href="{{ url_for('public.organizer_home') }}" class="sidebar-link"><i class="bi bi-grid nav-icon"></i> Dashboard</a>
+<a href="{{ url_for('events.index') }}" class="sidebar-link active"><i class="bi bi-calendar-event nav-icon"></i> My Events</a>
+<a href="{{ url_for('events.create') }}" class="sidebar-link"><i class="bi bi-plus-circle nav-icon"></i> Create Event</a>
+<a href="{{ url_for('events.calendar') }}" class="sidebar-link"><i class="bi bi-calendar3 nav-icon"></i> Calendar</a>
+<a href="{{ url_for('venues.index') }}" class="sidebar-link"><i class="bi bi-building nav-icon"></i> Venues</a>
+<a href="{{ url_for('vendors.index') }}" class="sidebar-link"><i class="bi bi-shop nav-icon"></i> Vendors</a>
+<a href="{{ url_for('bookings.index') }}" class="sidebar-link"><i class="bi bi-ticket nav-icon"></i> Bookings</a>
+<a href="{{ url_for('reports.index') }}" class="sidebar-link"><i class="bi bi-graph-up nav-icon"></i> Reports</a>
+<a href="{{ url_for('notifications.index') }}" class="sidebar-link"><i class="bi bi-bell nav-icon"></i> Notifications</a>
+<a href="{{ url_for('auth.profile') }}" class="sidebar-link"><i class="bi bi-person nav-icon"></i> Profile</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-header-title">My Events ({{ events|length }})</div>
+    <div class="page-header-sub">Create and manage all your events from one place.</div>
+  </div>
+  <a href="{{ url_for('events.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New Event</a>
+</div>
+{% if events %}
+<div class="row g-3">
+{% for ev in events %}
+<div class="col-md-6 col-lg-4">
+  <div class="card h-100">
+    <div style="height:120px;background:linear-gradient(135deg,
+      {% if ev.category=='wedding' %}#92400e,#d97706
+      {% elif ev.category=='corporate' %}#1e3a5f,#2563eb
+      {% elif ev.category=='concert' %}#3b0764,#7c3aed
+      {% elif ev.category=='birthday' %}#831843,#e11d48
+      {% elif ev.category=='fest' %}#064e3b,#059669
+      {% else %}#1e293b,#334155{% endif %});
+      border-radius:var(--radius-md) var(--radius-md) 0 0;display:flex;align-items:center;justify-content:center;position:relative;">
+      <i class="bi bi-{% if ev.category=='wedding' %}heart{% elif ev.category=='corporate' %}briefcase{% elif ev.category=='concert' %}music-note-beamed{% elif ev.category=='birthday' %}gift{% else %}calendar-event{% endif %}" style="font-size:2.5rem;color:rgba(255,255,255,.25);"></i>
+      <span class="status-badge status-{{ ev.status }}" style="position:absolute;top:10px;right:10px;">{{ ev.status|title }}</span>
+    </div>
+    <div class="card-body">
+      <h6 style="font-weight:700;color:var(--slate-900);margin-bottom:.4rem;">{{ ev.title }}</h6>
+      <div style="font-size:.8rem;color:var(--slate-500);margin-bottom:.6rem;">
+        <i class="bi bi-calendar3 me-1"></i>{{ ev.event_date.strftime('%d %b %Y, %I:%M %p') }}
+      </div>
+      {% if ev.location %}
+      <div style="font-size:.8rem;color:var(--slate-500);margin-bottom:.8rem;">
+        <i class="bi bi-geo-alt me-1"></i>{{ ev.location }}
+      </div>
+      {% endif %}
+      <div class="d-flex gap-2 mt-auto">
+        <a href="{{ url_for('events.detail', eid=ev.id) }}" class="btn btn-primary btn-sm flex-grow-1">View</a>
+        <a href="{{ url_for('events.edit', eid=ev.id) }}" class="btn btn-sm" style="background:var(--slate-100);color:var(--slate-700);">Edit</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+  <div class="empty-state-title">No events yet</div>
+  <div class="empty-state-sub">Create your first event and start managing it like a pro.</div>
+  <a href="{{ url_for('events.create') }}" class="btn btn-primary mt-3">Create First Event</a>
+</div>
+{% endif %}
+{% endblock %}
